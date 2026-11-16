@@ -13,23 +13,19 @@ export const INSTAGRAM_URL = 'https://instagram.com/grbassessoriacontabil';
 // Enquanto estiver vazio, o build não gera canonical/sitemap (evita apontar o Google para o endereço errado).
 export const SITE_URL = '';
 
-// Endereço — ajuste conforme necessário (as partes alimentam o endereço do site e os dados para o Google)
-export const ADDRESS_STREET = 'R. Coronel Nunes Freire, 1591';
-export const ADDRESS_DISTRICT = 'Siqueira';
+// Endereço do escritório. As partes alimentam o endereço mostrado no site, o mapa e os dados que vão para o Google.
+export const ADDRESS_STREET = 'Av. Ministro José Américo, 326, Sala 106 - Centro Comercial Quartier';
+export const ADDRESS_DISTRICT = 'Parque Iracema';
 export const ADDRESS_CITY = 'Fortaleza';
 export const ADDRESS_STATE = 'CE';
-export const ADDRESS_CEP = '60732-330';
+export const ADDRESS_CEP = '60824-245';
 export const ADDRESS = `${ADDRESS_STREET} - ${ADDRESS_DISTRICT}, ${ADDRESS_CITY} - ${ADDRESS_STATE}, ${ADDRESS_CEP}`;
-// Ponto do escritório no mapa: latitude e longitude do número 1591 da rua do CEP 60732-330.
-// O mapa usa as coordenadas, e não o texto do endereço, porque o Google Maps não reconhece o nome
-// "R. Coronel Nunes Freire": ele e os Correios chamam a rua desse CEP de "Rua Pereira Silva", e a busca
-// pelo texto mostrava só a região, sem marcador. Para mudar o ponto: no Google Maps, clique com o botão
-// direito no lugar certo, copie os dois números e cole aqui.
-export const MAPS_PONTO = '-3.8152872,-38.6281619';
-// Link "Abrir no Google Maps": abre o mesmo ponto do mapa embutido
-export const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${MAPS_PONTO}`;
-// Mapa embutido (não precisa de chave de API): marcador no ponto, com o nome da empresa na etiqueta
-export const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(`${MAPS_PONTO} (GRB Assessoria Contábil)`)}&z=17&output=embed`;
+// O mapa e o link "Abrir no Google Maps" buscam pelo endereço acima, que o Google Maps localiza no número exato.
+// Se o endereço mudar e o mapa mostrar só a região, sem marcador, o Google não reconheceu o texto: confira
+// rua, número e CEP.
+export const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
+// Mapa embutido (não precisa de chave de API)
+export const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(ADDRESS)}&output=embed`;
 
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá. Encontrei a GRB Assessoria Contábil pelo site e gostaria de mais informações.')}`;
 export const WHATSAPP_QUOTE_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá. Gostaria de solicitar uma proposta para a minha empresa.')}`;

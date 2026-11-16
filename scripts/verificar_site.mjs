@@ -147,10 +147,11 @@ try {
                     return { soIcone: getComputedStyle(b.querySelector('span')).display === 'none', dx: (c.left + c.width / 2) - (a.left + a.width / 2), dy: (c.top + c.height / 2) - (a.top + a.height / 2) };
                 })(),
                 diferenciais: !!document.getElementById('diferenciais') || !!document.querySelector('a[href="#diferenciais"]'),
-                // Mapa: o quadro embutido e o link "Abrir no Google Maps" têm de apontar para o mesmo ponto (latitude,longitude)
+                // Mapa: o quadro embutido e o link "Abrir no Google Maps" têm de buscar exatamente o endereço escrito no site
                 mapa: (() => {
-                    const ponto = (u) => (decodeURIComponent(u).match(/-?\d+\.\d{4,},-?\d+\.\d{4,}/) || [''])[0];
-                    return { quadro: ponto(document.querySelector('.contact-map-embed iframe').src), link: ponto(document.querySelector('.contact-map-link').href) };
+                    const endereco = document.querySelector('.contact-map-card__header p').textContent.trim();
+                    const busca = (u) => decodeURIComponent(u).includes(endereco);
+                    return { endereco, quadro: busca(document.querySelector('.contact-map-embed iframe').src), link: busca(document.querySelector('.contact-map-link').href), rodape: document.querySelector('.footer').textContent.includes(endereco) };
                 })(),
                 h1: document.querySelectorAll('h1').length,
                 titulo: document.title,
@@ -165,7 +166,7 @@ try {
         ok(g.h1 === 1 && g.titulo.includes('Contabilidade em Fortaleza'), 'um único título principal e "Contabilidade em Fortaleza" no título da aba', `h1=${g.h1}, "${g.titulo}"`);
         ok(g.linksWhats.length >= 10 && g.whatsErrados.length === 0, `${g.linksWhats.length} links de WhatsApp, todos para o número certo`, g.whatsErrados.join(', '));
         ok(g.tortos.length === 0, 'ícones centralizados dentro das caixas', g.tortos.join('; '));
-        ok(g.mapa.quadro !== '' && g.mapa.quadro === g.mapa.link, 'mapa e link "Abrir no Google Maps" apontam para o mesmo ponto, por coordenadas', JSON.stringify(g.mapa));
+        ok(g.mapa.endereco.length > 20 && g.mapa.quadro && g.mapa.link && g.mapa.rodape, 'mapa, link "Abrir no Google Maps" e rodapé usam o mesmo endereço', JSON.stringify(g.mapa));
         if (g.botaoWhats.soIcone) ok(Math.abs(g.botaoWhats.dx) < 1.5 && Math.abs(g.botaoWhats.dy) < 1.5, 'botão flutuante do WhatsApp com o ícone no centro do círculo', `fora do centro ${Math.round(g.botaoWhats.dx)}px, ${Math.round(g.botaoWhats.dy)}px`);
         ok(!g.diferenciais, 'seção "Diferenciais" fora do site, sem link sobrando no menu nem no rodapé');
         // As três pessoas estão no lado direito da foto: o quadro tem de ser quase quadrado e encostado na direita
