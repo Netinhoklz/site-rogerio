@@ -1,0 +1,18 @@
+# Publicação no Render (render.com) como site estático.
+# No painel do Render: New > Blueprint > escolher este repositório. O Render lê este arquivo,
+# instala as dependências, gera o site e publica a pasta dist/. A cada push na branch main ele publica de novo.
+services:
+  - type: web
+    name: site-rogerio
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    autoDeployTrigger: commit
+    headers:
+      # Os arquivos de assets/ levam um código no nome e mudam a cada build: podem ficar 1 ano no navegador.
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+    # Quando o domínio próprio estiver ligado ao site, defina no painel do Render (Environment) a variável
+    # SITE_URL com esse endereço (ex.: https://www.seudominio.com.br), para o Google receber o endereço certo.
+    # Sem ela, o build usa o endereço do próprio Render (https://site-rogerio.onrender.com).

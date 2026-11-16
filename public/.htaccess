@@ -1,0 +1,24 @@
+# Configuração para a hospedagem Linux da Locaweb (Apache). Vai junto no build para dentro da public_html.
+
+# Força HTTPS (regra da ajuda da Locaweb). Só funciona com o certificado SSL ativo no painel.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# Compressão (site carrega mais rápido, o que também conta para o Google)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript image/svg+xml text/plain application/xml
+</IfModule>
+
+# Cache: CSS/JS de assets/ têm um código no nome e mudam a cada build, então podem ficar 1 ano no navegador.
+# O index.html é sempre conferido de novo, para a versão nova aparecer logo após o envio.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
