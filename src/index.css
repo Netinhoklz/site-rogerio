@@ -90,7 +90,7 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 
 .skip-link {
     position: absolute;
-    top: -40px; left: 0;
+    top: -60px; left: 0;
     background: var(--navy-900);
     color: var(--white);
     padding: 8px 16px;
@@ -132,7 +132,11 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     background: linear-gradient(90deg, var(--accent), var(--accent-dark));
     border-radius: 2px;
     opacity: 0.4;
+    /* O sublinhado se desenha da esquerda para a direita depois que o título aparece */
+    transform-origin: left;
+    animation: sublinhar .9s var(--ease-out) 1s backwards;
 }
+@keyframes sublinhar { from { transform: scaleX(0); } }
 
 .section { padding: clamp(4rem, 8vw, 7rem) 0; }
 
@@ -156,7 +160,10 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     width: 60%; height: 200%;
     background: radial-gradient(circle, rgba(244,185,66,0.08), transparent 60%);
     pointer-events: none;
+    animation: deriva 22s ease-in-out infinite alternate;
 }
+/* Mancha de luz que se desloca bem devagar (fundo do topo e das seções azuis) */
+@keyframes deriva { to { transform: translate(-70px, 50px) scale(1.12); } }
 
 .grid-2 {
     display: grid;
@@ -192,6 +199,27 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     transition: opacity .25s var(--ease);
 }
 .btn:hover::after { opacity: 1; }
+/* Reflexo de luz que atravessa o botão ao passar o mouse */
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    width: 45%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: translateX(-130%) skewX(-20deg);
+    pointer-events: none;
+}
+@keyframes reflexo {
+    from { transform: translateX(-130%) skewX(-20deg); }
+    to { transform: translateX(270%) skewX(-20deg); }
+}
+/* Nos botões principais do WhatsApp o reflexo também passa sozinho, a cada 6 segundos */
+@keyframes reflexoSozinho {
+    0% { transform: translateX(-130%) skewX(-20deg); }
+    14%, 100% { transform: translateX(270%) skewX(-20deg); }
+}
+.btn--whatsapp.btn--lg::before, .btn--whatsapp.btn--xl::before { animation: reflexoSozinho 6s var(--ease) 2s infinite; }
+.btn:hover::before { animation: reflexo .8s var(--ease); }
 
 .btn--primary {
     background: var(--navy-900);
@@ -231,6 +259,8 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 .btn--xl { padding: 20px 40px; font-size: 1.1rem; gap: 10px; }
 .btn--sm { padding: 10px 20px; font-size: 0.875rem; }
 .btn--full { width: 100%; }
+/* Resposta ao clique: o botão afunda de leve */
+.btn:active { transform: scale(0.97); }
 
 /* ===================== Header ===================== */
 .header {
@@ -244,6 +274,15 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     border-bottom: 1px solid transparent;
 }
 .header.is-scrolled { box-shadow: var(--shadow-md); border-bottom-color: var(--gray-100); }
+/* Barra de progresso da leitura: a largura vem de Header.jsx conforme a página é rolada */
+.header__progress {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+    transform: scaleX(0);
+    transform-origin: left;
+}
 
 .header__inner {
     display: flex;
@@ -284,6 +323,23 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 .nav__link:hover::after, .nav__link.is-active::after { width: 100%; }
 
 .header__cta { flex-shrink: 0; }
+.header__acoes { display: flex; align-items: center; gap: 1.5rem; flex-shrink: 0; }
+/* Telefone fixo: só em telas largas (ver o bloco de 1180 px mais abaixo) */
+.header__phone { display: none; align-items: center; gap: 10px; color: var(--navy-900); }
+.header__phone-icon {
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 50%;
+    color: var(--navy-800);
+    transition: background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease);
+}
+.header__phone:hover .header__phone-icon { background: var(--navy-900); border-color: var(--navy-900); color: var(--accent); }
+.header__phone-texto { display: flex; flex-direction: column; font-size: 0.95rem; font-weight: 700; line-height: 1.25; white-space: nowrap; }
+.header__phone-texto small { font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); }
+@media (min-width: 1180px) {
+    .header__phone { display: flex; }
+}
 
 .nav-toggle {
     display: none;
@@ -355,6 +411,15 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     -webkit-mask-image: radial-gradient(ellipse at center, black 15%, transparent 65%);
     opacity: 0.35;
 }
+.hero__bg::before {
+    content: '';
+    position: absolute;
+    top: 8%; right: 6%;
+    width: 520px; height: 520px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(244,185,66,0.2), transparent 65%);
+    animation: deriva 16s ease-in-out infinite alternate;
+}
 
 .hero__inner {
     display: grid;
@@ -366,7 +431,12 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     padding-top: 4rem;
 }
 
-.hero__content { animation: fadeUp .8s var(--ease-out); }
+/* Entrada em sequência: selo, título, texto, botões e garantias, um depois do outro */
+.hero__content > * { animation: fadeUp .8s var(--ease-out) backwards; }
+.hero__content > :nth-child(2) { animation-delay: .1s; }
+.hero__content > :nth-child(3) { animation-delay: .2s; }
+.hero__content > :nth-child(4) { animation-delay: .3s; }
+.hero__content > :nth-child(5) { animation-delay: .4s; }
 .hero__title { margin-bottom: 1.25rem; color: var(--navy-900); }
 .hero__lead {
     font-size: 1.2rem;
@@ -395,8 +465,11 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 .hero__trust-item svg { color: var(--whatsapp); flex-shrink: 0; }
 
 /* Hero Visual Right */
+/* Painel animado: entra subindo, flutua devagar e inclina na direção do mouse; o cartão de fundo balança
+   de leve. As variáveis --rx, --ry (inclinação) e --mx, --my (ponto do brilho) vêm de HeroPanel.jsx. */
 .hero__visual {
     position: relative;
+    perspective: 1100px;
     animation: fadeUp 1s var(--ease-out) .2s backwards;
 }
 .hero__visual-bg {
@@ -407,6 +480,11 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     transform: rotate(-3deg);
     z-index: 0;
     box-shadow: var(--shadow-xl);
+    animation: balancar 9s ease-in-out infinite alternate;
+}
+@keyframes balancar {
+    from { transform: rotate(-3deg); }
+    to { transform: rotate(-1.4deg); }
 }
 
 .hero__stats-grid {
@@ -420,9 +498,31 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
+    /* A inclinação usa transform e a flutuação usa translate: são propriedades separadas e não brigam */
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform .35s var(--ease-out);
+    animation: flutuar 7s ease-in-out infinite;
 }
+@keyframes flutuar {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -8px; }
+}
+/* Brilho dourado que acompanha o cursor */
+.hero__stats-grid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(244,185,66,0.18), transparent 65%);
+    opacity: 0;
+    transition: opacity .35s var(--ease);
+    pointer-events: none;
+}
+.hero__visual:hover .hero__stats-grid::before { opacity: 1; }
 
+/* Cada quadro é um link: entra em sequência, sobe um pouco e mostra uma seta ao passar o mouse */
 .hero__stat {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -430,9 +530,33 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     background: rgba(255,255,255,0.07);
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: var(--radius);
-    transition: background .25s var(--ease);
+    transition: background .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease-out), box-shadow .25s var(--ease);
+    animation: fadeUp .7s var(--ease-out) backwards;
 }
-.hero__stat:hover { background: rgba(255,255,255,0.12); }
+.hero__stat:nth-child(1) { animation-delay: .45s; }
+.hero__stat:nth-child(2) { animation-delay: .57s; }
+.hero__stat:nth-child(3) { animation-delay: .69s; }
+.hero__stat:nth-child(4) { animation-delay: .81s; }
+.hero__stat::after {
+    content: '→';
+    position: absolute;
+    top: 0.85rem; right: 1rem;
+    color: var(--accent);
+    font-weight: 700;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity .25s var(--ease), transform .25s var(--ease-out);
+}
+.hero__stat:hover,
+.hero__stat:focus-visible {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(244,185,66,0.5);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+}
+.hero__stat:hover::after,
+.hero__stat:focus-visible::after { opacity: 1; transform: translateX(0); }
+.hero__stat:active { transform: translateY(0) scale(0.98); }
 
 .hero__stat--main {
     grid-column: 1 / -1;
@@ -458,6 +582,25 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     font-weight: 500;
 }
 
+/* Computador e tablet deitado (duas colunas): o texto e o painel ocupam caixas iguais, com a mesma largura
+   e a mesma altura. O texto fica um pouco menor e o painel cresce até a altura do texto. No celular nada muda. */
+@media (min-width: 961px) {
+    .hero__inner { grid-template-columns: 1fr 1fr; align-items: stretch; }
+    .hero__content .eyebrow { font-size: 0.74rem; letter-spacing: 0.1em; }
+    .hero__title { font-size: clamp(2.5rem, 4.4vw, 3.3rem); }
+    .hero__lead { font-size: 1.1rem; margin-bottom: 2rem; }
+    /* O cartão azul de fundo ocupa exatamente a caixa da coluna; o painel fica 20 px para dentro dele
+       e estica na altura. As três fileiras dividem a altura na proporção 1,25 : 1 : 0,75. */
+    .hero__visual { display: flex; }
+    .hero__visual-bg { inset: 0; }
+    .hero__stats-grid { flex: 1; margin: 20px; padding: 2.75rem; grid-template-rows: 1.25fr 1fr 0.75fr; }
+    .hero__stat { justify-content: center; padding: 1.5rem 1.25rem; }
+    .hero__stat-value { font-size: 3rem; }
+    .hero__stat .hero__stat-value--text { font-size: 1.75rem; }
+    .hero__stat--main .hero__stat-value--text { font-size: 2.05rem; }
+    .hero__stat-label { font-size: 0.95rem; }
+}
+
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(28px); }
     to { opacity: 1; transform: translateY(0); }
@@ -478,22 +621,35 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     letter-spacing: 0.12em;
     margin-bottom: 1.25rem;
 }
+/* Faixa das logos de clientes: desliza sem parar e pausa quando o mouse está em cima.
+   São duas listas iguais lado a lado; quando a primeira sai inteira pela esquerda, o ciclo recomeça sem salto. */
+.partners__faixa {
+    display: flex;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
 .partners__list {
     display: flex;
-    flex-wrap: wrap;
-    gap: 2.5rem;
-    justify-content: center;
+    flex-shrink: 0;
+    min-width: 100%;
+    justify-content: space-around;
     list-style: none;
     padding: 0;
+    animation: esteira 34s linear infinite;
 }
-.partners__list li {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--gray-300);
-    transition: color .2s var(--ease);
-    letter-spacing: 0.02em;
+.partners__faixa:hover .partners__list { animation-play-state: paused; }
+@keyframes esteira { to { transform: translateX(-100%); } }
+/* Cada logo ocupa uma caixa do mesmo tamanho; ficam em tons de cinza até o mouse passar por cima */
+.partners__list li { flex-shrink: 0; width: 170px; height: 72px; margin: 0 1.75rem; }
+.partners__list img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    filter: grayscale(1);
+    opacity: 0.7;
+    transition: filter .3s var(--ease), opacity .3s var(--ease);
 }
-.partners__list li:hover { color: var(--navy-900); }
+.partners__list li:hover img { filter: none; opacity: 1; }
 
 /* ===================== About ===================== */
 /* Cartão azul da mesma altura da coluna de texto: a foto em cima, a faixa "15+" embaixo */
@@ -543,6 +699,8 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     color: var(--accent);
     line-height: 1;
 }
+/* Largura do "15+" reservada desde o começo: o texto ao lado não se mexe enquanto o número conta */
+.about__number > span { min-width: 1.42em; }
 .about__number small {
     font-size: 1.05rem;
     color: rgba(255,255,255,0.85);
@@ -564,7 +722,11 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     text-align: center;
+    position: relative;
+    overflow: hidden;
 }
+.principle:hover { transform: translateY(-5px); border-color: var(--accent); }
+.principle:hover .principle__icon { transform: scale(1.08) rotate(-6deg); }
 .principle__icon {
     width: 76px; height: 76px;
     display: grid; place-items: center;
@@ -572,6 +734,7 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     border: 2px solid var(--accent);
     border-radius: 50%;
     color: var(--white);
+    transition: transform .4s var(--ease-spring);
 }
 .principle__icon svg { width: 36px; height: 36px; stroke-width: 1.6; }
 .principle h3 {
@@ -635,6 +798,14 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     -webkit-mask-composite: unset;
     mask-composite: unset;
 }
+/* Os itens entram um depois do outro quando a seção aparece */
+.reveal.is-visible .checklist li { animation: entrarDoLado .6s var(--ease-out) backwards; }
+.checklist li:nth-child(1) { animation-delay: .25s; }
+.checklist li:nth-child(2) { animation-delay: .35s; }
+.checklist li:nth-child(3) { animation-delay: .45s; }
+.checklist li:nth-child(4) { animation-delay: .55s; }
+.checklist li:nth-child(5) { animation-delay: .65s; }
+@keyframes entrarDoLado { from { opacity: 0; transform: translateX(-16px); } }
 
 /* ===================== Services ===================== */
 .services {
@@ -652,6 +823,8 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     border-radius: var(--radius-lg);
     transition: all .3s var(--ease);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 .service-card::before {
     content: '';
@@ -695,6 +868,7 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     color: var(--accent);
     border-radius: var(--radius);
     margin-bottom: 1.5rem;
+    align-self: flex-start;
     transition: transform .3s var(--ease-spring);
 }
 .service-card:hover .service-card__icon { transform: scale(1.1); }
@@ -702,7 +876,7 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 
 .service-card h3 { color: var(--white); margin-bottom: 0.75rem; }
 .service-card p { color: rgba(255,255,255,0.7); font-size: 0.95rem; margin-bottom: 1.25rem; line-height: 1.6; }
-.service-card ul { list-style: none; padding: 0; display: grid; gap: 0.6rem; }
+.service-card ul { list-style: none; padding: 0; display: grid; gap: 0.6rem; margin-bottom: 1.5rem; }
 .service-card ul li {
     position: relative;
     padding-left: 1.5rem;
@@ -716,6 +890,21 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     color: var(--accent);
     font-weight: 700;
 }
+/* Link no pé de cada quadro: abre o WhatsApp já com o nome do serviço na mensagem */
+.service-card__link {
+    margin-top: auto;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+.service-card__link span { transition: transform .25s var(--ease-out); }
+.service-card:hover .service-card__link span { transform: translateX(5px); }
+.service-card__link:hover { color: var(--white); }
 /* Último quadro da grade: chamada "Sua empresa em boas mãos" */
 .service-card--cta {
     display: flex;
@@ -732,6 +921,109 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 /* São 7 serviços + a chamada: com 3 colunas, a chamada ocupa duas e fecha a grade */
 @media (min-width: 1000px) {
     .service-card--cta { grid-column: span 2; }
+}
+
+/* Regimes tributários atendidos, no cabeçalho da seção de serviços */
+.regimes__label {
+    margin-bottom: 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+}
+.regimes ul { display: flex; flex-wrap: wrap; gap: 0.6rem; list-style: none; padding: 0; }
+.regimes li {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 100px;
+}
+
+/* ===================== Como funciona ===================== */
+/* Fundo branco, para alternar com a seção de fotos logo abaixo (cinza-claro).
+   Se a seção "Diferenciais" (branca) voltar, use var(--off-white) aqui. */
+.process { background: var(--white); }
+.process__steps {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    list-style: none;
+    padding: 0;
+}
+/* Linha que liga as etapas: a cinza é o trilho; a dourada se desenha quando a seção aparece */
+.process__steps::before, .process__steps::after {
+    content: '';
+    position: absolute;
+    top: 29px;
+    left: 12.5%; right: 12.5%;
+    height: 2px;
+    background: var(--gray-200);
+}
+.process__steps::after {
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.8s var(--ease) .4s;
+}
+.process__steps.is-visible::after { transform: scaleX(1); }
+.process__step { position: relative; z-index: 1; text-align: center; }
+.process__num {
+    width: 60px; height: 60px;
+    display: grid; place-items: center;
+    margin: 0 auto 1.25rem;
+    background: var(--white);
+    border: 2px solid var(--gray-200);
+    border-radius: 50%;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-400);
+}
+/* Os números acendem um depois do outro, acompanhando a linha */
+.process__steps.is-visible .process__num { animation: acender .5s var(--ease) forwards; }
+.process__step:nth-child(1) .process__num { animation-delay: .4s; }
+.process__step:nth-child(2) .process__num { animation-delay: .95s; }
+.process__step:nth-child(3) .process__num { animation-delay: 1.5s; }
+.process__step:nth-child(4) .process__num { animation-delay: 2.05s; }
+@keyframes acender {
+    to { background: var(--navy-900); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 6px rgba(244,185,66,0.18); }
+}
+.process__step h3 { margin-bottom: 0.5rem; font-size: 1.12rem; }
+.process__step p { font-size: 0.95rem; line-height: 1.65; color: var(--gray-500); }
+.process__cta { margin-top: 3rem; text-align: center; }
+/* Tablet: duas colunas, sem a linha (ela não teria como ligar as quatro etapas) */
+@media (max-width: 960px) {
+    .process__steps { grid-template-columns: 1fr 1fr; gap: 2.5rem 2rem; }
+    .process__steps::before, .process__steps::after { display: none; }
+}
+/* Celular: etapas empilhadas, número à esquerda e uma linha descendo de cada número até o seguinte */
+@media (max-width: 720px) {
+    .process__steps { grid-template-columns: 1fr; gap: 1.75rem; }
+    .process__step { display: grid; grid-template-columns: 60px 1fr; column-gap: 1.1rem; align-content: start; text-align: left; }
+    .process__num { grid-row: span 2; margin: 0; }
+    .process__step h3 { align-self: end; margin-bottom: 0.35rem; }
+    .process__step:not(:last-child)::before, .process__step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 29px; top: 60px; bottom: -1.75rem;
+        width: 2px;
+        background: var(--gray-200);
+    }
+    .process__step:not(:last-child)::after {
+        background: var(--accent);
+        transform: scaleY(0);
+        transform-origin: top;
+        transition: transform .55s var(--ease);
+    }
+    .process__steps.is-visible .process__step::after { transform: scaleY(1); }
+    .process__step:nth-child(1)::after { transition-delay: .6s; }
+    .process__step:nth-child(2)::after { transition-delay: 1.15s; }
+    .process__step:nth-child(3)::after { transition-delay: 1.7s; }
 }
 
 /* ===================== Features ===================== */
@@ -782,12 +1074,17 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     grid-template-columns: 0.9fr 1fr 0.9fr;
     gap: 1rem;
 }
+/* Cada foto é um botão: clicar abre a foto ampliada (Gallery.jsx) */
 .gallery__item {
     position: relative;
     aspect-ratio: 3/2;
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-md);
+    display: block;
+    width: 100%;
+    padding: 0;
+    cursor: zoom-in;
 }
 /* As fotos em pé não têm altura própria: ocupam a das duas deitadas ao lado */
 .gallery__item--tall { grid-row: span 2; aspect-ratio: auto; }
@@ -799,6 +1096,73 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     transition: transform .6s var(--ease);
 }
 .gallery__item:hover img { transform: scale(1.04); }
+/* Lupa no canto da foto: aparece ao passar o mouse e indica que a foto amplia */
+.gallery__zoom {
+    position: absolute;
+    right: 14px; bottom: 14px;
+    width: 42px; height: 42px;
+    display: grid; place-items: center;
+    background: rgba(11,37,69,0.82);
+    color: var(--white);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity .25s var(--ease), transform .3s var(--ease-spring);
+}
+.gallery__item:hover .gallery__zoom,
+.gallery__item:focus-visible .gallery__zoom { opacity: 1; transform: scale(1); }
+
+/* Foto ampliada: janela sobre a página, com fundo escuro */
+.lightbox {
+    position: fixed;
+    inset: 0;
+    width: 100%; height: 100%;
+    max-width: none; max-height: none;
+    margin: 0;
+    padding: 1rem;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+}
+.lightbox[open] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+.lightbox::backdrop { background: rgba(6,15,30,0.92); animation: surgir .25s var(--ease); }
+/* Com a foto aberta, a página de trás não rola */
+html:has(.lightbox[open]) { overflow: hidden; scrollbar-gutter: stable; }
+.lightbox__img {
+    width: auto; height: auto;
+    max-width: min(100%, 1100px);
+    max-height: calc(100vh - 7.5rem);
+    max-height: calc(100dvh - 7.5rem);
+    border-radius: var(--radius);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    animation: ampliar .35s var(--ease-out);
+}
+.lightbox__legenda { color: rgba(255,255,255,0.85); font-size: 0.9rem; text-align: center; }
+.lightbox__fechar, .lightbox__seta {
+    position: absolute;
+    width: 48px; height: 48px;
+    display: grid; place-items: center;
+    background: rgba(6,15,30,0.6);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: var(--white);
+    border-radius: 50%;
+    font-size: 1.75rem;
+    line-height: 1;
+    transition: background .2s var(--ease), color .2s var(--ease);
+}
+.lightbox__fechar:hover, .lightbox__seta:hover { background: var(--accent); border-color: var(--accent); color: var(--navy-900); }
+.lightbox__fechar { top: 1rem; right: 1rem; }
+.lightbox__seta { top: 50%; translate: 0 -50%; }
+.lightbox__seta--anterior { left: 1rem; }
+.lightbox__seta--proxima { right: 1rem; }
+@keyframes surgir { from { opacity: 0; } }
+@keyframes ampliar { from { opacity: 0; transform: scale(0.94); } }
 
 /* ===================== Testimonials ===================== */
 .testimonials {
@@ -833,15 +1197,55 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     z-index: 0;
 }
 .testimonial:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--accent); }
-/* O depoimento em destaque fica sozinho, acima da grade */
+/* Assinatura sempre no pé do cartão, mesmo quando os textos da fileira têm tamanhos diferentes */
+.testimonial { display: flex; flex-direction: column; }
+.testimonial:not(.testimonial--featured) figcaption { margin-top: auto; }
+/* O depoimento em destaque fica sozinho, acima da grade: texto à esquerda; à direita, a logo da empresa e quem assina */
 .testimonials__featured { margin-bottom: 1.75rem; }
+.testimonial--featured {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    column-gap: 3rem;
+    align-items: center;
+    padding: 3rem;
+    border-color: rgba(244,185,66,0.45);
+}
+.testimonial--featured .testimonial__stars,
+.testimonial--featured blockquote { grid-column: 1; }
+.testimonial--featured blockquote { margin-bottom: 0; padding-left: 1.5rem; border-left: 3px solid var(--accent); font-size: 1.12rem; }
+.testimonial--featured figcaption {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-left: 3rem;
+    border-left: 1px solid var(--gray-100);
+}
+.testimonial--featured::before { display: none; }
+.testimonial__logo { width: 220px; height: auto; }
+/* Nos demais depoimentos, a logo da empresa ocupa o lugar da inicial do nome, num quadrado pequeno */
+.testimonial:not(.testimonial--featured) .testimonial__logo { flex-shrink: 0; width: 52px; height: 52px; margin-top: 2px; object-fit: contain; }
+@media (max-width: 900px) {
+    .testimonial--featured { grid-template-columns: 1fr; padding: 2rem 1.5rem; }
+    .testimonial--featured blockquote { margin-bottom: 1.5rem; padding-left: 1rem; font-size: 1.02rem; }
+    .testimonial--featured figcaption { grid-column: 1; grid-row: auto; padding: 1.5rem 0 0; border-left: 0; border-top: 1px solid var(--gray-100); }
+    .testimonial__logo { width: 180px; }
+}
 /* Aviso "deslize para o lado": só aparece na versão de celular */
 .swipe-hint { display: none; }
+.testimonials__dots { display: none; }
 .testimonial__stars {
     color: var(--accent);
     font-size: 1rem;
     letter-spacing: 2px;
     margin-bottom: 1rem;
+    width: fit-content;
+}
+/* As estrelas acendem uma a uma quando o depoimento aparece */
+.testimonial.is-visible .testimonial__stars { animation: estrelas 1s steps(5, end) .35s backwards; }
+@keyframes estrelas {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
 }
 .testimonial blockquote {
     font-size: 1.05rem;
@@ -921,37 +1325,6 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 }
 .testimonials__cta strong { color: var(--accent); }
 
-/* Logos de clientes */
-.clients { margin-bottom: 3rem; }
-.clients__label {
-    text-align: center;
-    font-size: 0.8rem;
-    color: var(--gray-400);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 1.25rem;
-}
-.clients__list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-    justify-content: center;
-    list-style: none;
-    padding: 0;
-}
-.clients__item {
-    width: 200px;
-    height: 110px;
-    padding: 1rem 1.25rem;
-    background: var(--white);
-    border: 1px solid var(--gray-100);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    transition: all .3s var(--ease);
-}
-.clients__item:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--accent); }
-.clients__item img { width: 100%; height: 100%; object-fit: contain; }
-
 /* ===================== FAQ ===================== */
 .faq { display: grid; gap: 0.85rem; }
 .faq__item {
@@ -992,6 +1365,9 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 .faq__item[open] summary::after { transform: rotate(45deg); background: var(--accent); }
 .faq__item summary:hover { background: var(--off-white); }
 .faq__item p { padding: 0 1.75rem 1.4rem; color: var(--gray-500); line-height: 1.7; }
+/* A resposta desce suavemente ao abrir */
+.faq__item[open] p { animation: abrirResposta .4s var(--ease-out); }
+@keyframes abrirResposta { from { opacity: 0; transform: translateY(-8px); } }
 
 /* ===================== CTA Section ===================== */
 .cta-section {
@@ -1570,13 +1946,109 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 .back-to-top:hover { background: var(--navy-800); transform: translateY(-3px); }
 .back-to-top svg { width: 20px; height: 20px; }
 
+/* Convite do WhatsApp: balão que sai do botão flutuante alguns segundos depois de a página abrir
+   (tempos e assuntos em FloatingButtons.jsx) */
+.convite {
+    position: fixed;
+    right: 28px; bottom: 102px;
+    width: min(340px, calc(100vw - 32px));
+    padding: 1.1rem 1.25rem 1.25rem;
+    background: var(--white);
+    border: 1px solid var(--gray-100);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-xl);
+    z-index: 91;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(14px) scale(0.96);
+    transform-origin: bottom right;
+    transition: opacity .35s var(--ease), transform .4s var(--ease-spring), visibility .35s;
+}
+.convite.is-visible { opacity: 1; visibility: visible; transform: none; }
+/* Ponta do balão, apontando para o botão */
+.convite::after {
+    content: '';
+    position: absolute;
+    right: 22px; bottom: -8px;
+    width: 14px; height: 14px;
+    background: var(--white);
+    border-right: 1px solid var(--gray-100);
+    border-bottom: 1px solid var(--gray-100);
+    transform: rotate(45deg);
+}
+.convite__marca {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--whatsapp-dark);
+}
+.convite__marca svg { color: var(--whatsapp); }
+.convite strong { display: block; padding-right: 1.5rem; font-size: 1rem; line-height: 1.35; color: var(--navy-900); }
+.convite p { margin: 0.35rem 0 0.9rem; font-size: 0.86rem; line-height: 1.5; color: var(--gray-500); }
+.convite__opcoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.convite__opcoes a {
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--whatsapp-dark);
+    background: rgba(37,211,102,0.1);
+    border: 1px solid rgba(37,211,102,0.4);
+    border-radius: 100px;
+    transition: background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease);
+}
+.convite__opcoes a:hover { background: var(--whatsapp-dark); border-color: var(--whatsapp-dark); color: var(--white); transform: translateY(-2px); }
+.convite__fechar {
+    position: absolute;
+    top: 2px; right: 2px;
+    width: 44px; height: 44px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--gray-400);
+    transition: background .2s var(--ease), color .2s var(--ease);
+}
+.convite__fechar:hover { background: var(--gray-50); color: var(--navy-900); }
+
 /* ===================== Reveal ===================== */
+/* A entrada usa `translate`, e não `transform`, para não brigar com o efeito de passar o mouse dos cartões
+   (que usa `transform` e continua rápido). --atraso escalona os cartões de uma mesma fileira. */
 .reveal {
     opacity: 0;
-    transform: translateY(32px);
-    transition: opacity .85s var(--ease-out), transform .85s var(--ease-out);
+    translate: 0 32px;
+    transition:
+        opacity .85s var(--ease-out) var(--atraso, 0s),
+        translate .85s var(--ease-out) var(--atraso, 0s),
+        transform .3s var(--ease), box-shadow .3s var(--ease),
+        background-color .3s var(--ease), border-color .3s var(--ease);
 }
-.reveal.is-visible { opacity: 1; transform: translateY(0); }
+.reveal.is-visible { opacity: 1; translate: none; }
+/* Cartões lado a lado entram um depois do outro, da esquerda para a direita */
+@media (min-width: 721px) {
+    .services > :nth-child(3n+2), .features > :nth-child(3n+2),
+    .principles__grid > :nth-child(3n+2), .testimonials__grid > :nth-child(3n+2) { --atraso: .12s; }
+    .services > :nth-child(3n), .features > :nth-child(3n),
+    .principles__grid > :nth-child(3n), .testimonials__grid > :nth-child(3n) { --atraso: .24s; }
+}
+
+/* ===================== Brilho que acompanha o cursor ===================== */
+/* hooks/useBrilhoCursor.js informa em que ponto do cartão o mouse está (--mx, --my) */
+.service-card::after, .feature::after, .principle::after, .testimonial::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), rgba(244,185,66,0.16), transparent 70%);
+    opacity: 0;
+    transition: opacity .35s var(--ease);
+    pointer-events: none;
+}
+.service-card:hover::after, .feature:hover::after, .principle:hover::after, .testimonial:hover::after { opacity: 1; }
 
 /* ===================== Responsive ===================== */
 /* Tablet em duas colunas: o texto fica bem mais alto que a foto. Em vez de esticar (sobraria um bloco
@@ -1633,6 +2105,8 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     .hero__actions .btn { width: 100%; }
     .hero__trust { gap: 1rem; }
     .hero__stats-grid { grid-template-columns: 1fr 1fr; }
+    /* Logos da faixa um pouco menores */
+    .partners__list li { width: 140px; height: 60px; margin: 0 1.1rem; }
 
     .form__grid { grid-template-columns: 1fr; }
     .form--premium { padding: 1.75rem; }
@@ -1649,8 +2123,12 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     .footer__bottom .container { flex-direction: column; text-align: center; }
     .footer__cta-bar-inner { flex-direction: column; text-align: center; }
 
-    .whatsapp-float { border-radius: 50%; width: 56px; height: 56px; padding: 0; right: 16px; bottom: 16px; }
+    .whatsapp-float { border-radius: 50%; width: 56px; height: 56px; padding: 0; right: 16px; bottom: 16px; justify-content: center; }
     .whatsapp-float span { display: none; }
+    /* Convite do WhatsApp: mais enxuto, só a pergunta e os assuntos */
+    .convite { right: 16px; bottom: 86px; padding: 1rem 1rem 1.1rem; }
+    .convite p { display: none; }
+    .convite strong { margin-bottom: 0.75rem; }
     .back-to-top { right: 82px; bottom: 20px; width: 42px; height: 42px; }
 
     .testimonials__cta { flex-direction: column; gap: 1rem; text-align: center; }
@@ -1678,6 +2156,7 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     .service-card:not(.service-card--cta) h3 { margin-bottom: 0; font-size: 1.1rem; }
     .service-card:not(.service-card--cta) p { grid-column: 1 / -1; margin: 1rem 0 0; }
     .service-card ul { display: none; }
+    .service-card__link { grid-column: 1 / -1; margin-top: 0.5rem; }
 
     /* Diferenciais: número ao lado do texto */
     .features { gap: 1rem; }
@@ -1708,7 +2187,16 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     .testimonials__grid::-webkit-scrollbar { display: none; }
     .testimonials__grid .testimonial { flex: 0 0 84%; scroll-snap-align: start; }
     /* Cartões fora da tela nunca "entram em vista" na rolagem vertical: aqui não usam a animação de entrada */
-    .testimonials__grid .reveal { opacity: 1; transform: none; }
+    .testimonials__grid .reveal { opacity: 1; translate: none; }
+    /* Pontinhos: o mais largo e dourado é o depoimento que está na tela */
+    .testimonials__dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 0.75rem; }
+    .testimonials__dots span {
+        width: 8px; height: 8px;
+        background: var(--gray-200);
+        border-radius: 100px;
+        transition: width .3s var(--ease), background .3s var(--ease);
+    }
+    .testimonials__dots span.is-active { width: 24px; background: var(--accent); }
     .swipe-hint {
         display: block;
         text-align: center;
@@ -1722,9 +2210,20 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
 /* Em tela de toque não existe "passar o mouse": sem isto, o efeito de elevação ficaria preso no item tocado */
 @media (hover: none) {
     .btn--primary:hover, .btn--whatsapp:hover, .btn--accent:hover,
-    .service-card:hover, .feature:hover, .testimonial:hover, .clients__item:hover,
+    .service-card:hover, .feature:hover, .testimonial:hover,
     .footer__social:hover, .back-to-top:hover { transform: none; }
     .service-card:hover .service-card__icon, .gallery__item:hover img, .quick-card:hover .quick-card__icon { transform: none; }
+    .hero__stat:hover { transform: none; box-shadow: none; }
+    .hero__stat::after { opacity: 0.65; transform: none; }
+    .principle:hover, .principle:hover .principle__icon, .convite__opcoes a:hover { transform: none; }
+    /* Sem mouse não há cursor para o brilho acompanhar */
+    .service-card::after, .feature::after, .principle::after, .testimonial::after { display: none; }
+    /* Logos de clientes sempre em cores: sem mouse, não haveria como vê-las coloridas */
+    .partners__list img { filter: none; opacity: 1; }
+    /* A lupa das fotos fica sempre visível, para indicar que elas ampliam ao toque */
+    .gallery__zoom { opacity: 1; transform: none; }
+    /* O toque continua tendo resposta: o botão afunda de leve */
+    .btn:active { transform: scale(0.97); }
 }
 
 @media (max-width: 480px) {
@@ -1739,10 +2238,6 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
     /* Frases do painel do topo: menores, para não ocuparem meia tela */
     .hero__stat .hero__stat-value--text { font-size: 1.3rem; }
     .hero__stat--main .hero__stat-value--text { font-size: 1.4rem; }
-
-    /* Logos de clientes: duas por linha em vez de uma */
-    .clients__list { gap: 0.75rem; }
-    .clients__item { width: calc(50% - 0.375rem); height: 96px; padding: 0.75rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1752,4 +2247,8 @@ h4 { font-size: 1rem; font-family: var(--font-body); font-weight: 600; }
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+    /* A faixa dos regimes não desliza: vira uma lista comum, com todos os itens à vista */
+    .partners__faixa { -webkit-mask-image: none; mask-image: none; }
+    .partners__list { flex-wrap: wrap; flex-shrink: 1; min-width: 0; justify-content: center; row-gap: 0.5rem; animation: none; }
+    .partners__list[aria-hidden="true"] { display: none; }
 }

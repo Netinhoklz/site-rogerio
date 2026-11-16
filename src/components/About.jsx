@@ -1,4 +1,5 @@
 import Reveal from './Reveal.jsx';
+import CountUp from './CountUp.jsx';
 import { WHATSAPP_DIAG_URL } from '../data/content.js';
 
 const CHECKS = [
@@ -24,7 +25,7 @@ export default function About() {
                         loading="lazy"
                     />
                     <div className="about__number">
-                        <span>15+</span>
+                        <span><CountUp to={15} suffix="+" /></span>
                         <small>anos de atuação em contabilidade</small>
                     </div>
                 </div>

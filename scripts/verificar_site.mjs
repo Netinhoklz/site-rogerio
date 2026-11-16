@@ -1,5 +1,6 @@
 // Verifica o site rodando (npm run preview) num Chrome sem janela, em tamanho de celular e de computador:
-// layout, imagens, menu do celular, perguntas frequentes, formulário e links do WhatsApp.
+// layout, imagens, menu do celular, perguntas frequentes, formulário, links do WhatsApp e as interações
+// (painel do topo, barra de progresso, faixa de logos, convite do WhatsApp, brilho dos cartões, fotos que ampliam).
 //
 // Uso:  node scripts/verificar_site.mjs [url] [--capturas pasta]
 //   url         padrão http://localhost:4173/
@@ -22,7 +23,7 @@ const TELAS = [
     { nome: 'tablet', width: 1024, height: 768, mobile: false },
     { nome: 'computador', width: 1366, height: 768, mobile: false },
 ];
-const SECOES = ['inicio', 'empresa', 'principios', 'servicos', 'diferenciais', 'escritorio', 'depoimentos', 'faq', 'contato'];
+const SECOES = ['inicio', 'empresa', 'principios', 'servicos', 'como-funciona', 'escritorio', 'depoimentos', 'faq', 'contato'];
 
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
 const perfil = mkdtempSync(join(tmpdir(), 'verificar-site-'));
@@ -69,6 +70,8 @@ try {
         console.log(`\n${tela.nome} (${tela.width}×${tela.height})`);
         erros.length = 0;
         await cdp('Emulation.setDeviceMetricsOverride', { width: tela.width, height: tela.height, deviceScaleFactor: 1, mobile: tela.mobile });
+        // O convite do WhatsApp só aparece uma vez por visita: cada tamanho de tela começa como uma visita nova
+        await naPagina(() => { try { sessionStorage.clear(); } catch { /* página em branco */ } });
         const carregou = new Promise((r) => { aoCarregar = r; });
         await cdp('Page.navigate', { url });
         await Promise.race([carregou, dormir(15000)]);
@@ -125,6 +128,30 @@ try {
                 cartao: ret(document.querySelector('.about__media')),
                 texto: ret(texto),
                 ultimoStat: stats.at(-1), gradeDireita: grade.getBoundingClientRect().right - parseFloat(gs.paddingRight) - parseFloat(gs.borderRightWidth),
+                estrelasApagadas: [...document.querySelectorAll('.testimonial__stars')].filter((el) => getComputedStyle(el).clipPath !== 'none').length,
+                // Elementos de confiança: logos de clientes, etapas, depoimento com logo, telefone
+                logosFaixa: [...document.querySelectorAll('.partners__list:not([aria-hidden]) img')].filter((i) => i.complete && i.naturalWidth > 0).length,
+                regimes: document.querySelectorAll('#servicos .regimes li').length,
+                etapas: {
+                    total: document.querySelectorAll('.process__step').length,
+                    acesas: [...document.querySelectorAll('.process__num')].filter((n) => getComputedStyle(n).color === 'rgb(244, 185, 66)').length,
+                    linha: getComputedStyle(document.querySelector('.process__steps'), '::after').transform,
+                },
+                logoDepoimento: (() => { const i = document.querySelector('.testimonial--featured .testimonial__logo'); return !!i && i.complete && i.naturalWidth > 0; })(),
+                telefone: (() => { const a = document.querySelector('.header__phone'); return { visivel: getComputedStyle(a).display !== 'none', href: a.getAttribute('href') }; })(),
+                topoTexto: ret(document.querySelector('.hero__content')), topoPainel: ret(document.querySelector('.hero__visual')),
+                // Botão flutuante do WhatsApp: quando mostra só o ícone (celular), o ícone tem de estar no centro do círculo
+                botaoWhats: (() => {
+                    const b = document.querySelector('.whatsapp-float');
+                    const a = b.getBoundingClientRect(), c = b.querySelector('svg').getBoundingClientRect();
+                    return { soIcone: getComputedStyle(b.querySelector('span')).display === 'none', dx: (c.left + c.width / 2) - (a.left + a.width / 2), dy: (c.top + c.height / 2) - (a.top + a.height / 2) };
+                })(),
+                diferenciais: !!document.getElementById('diferenciais') || !!document.querySelector('a[href="#diferenciais"]'),
+                // Mapa: o quadro embutido e o link "Abrir no Google Maps" têm de apontar para o mesmo ponto (latitude,longitude)
+                mapa: (() => {
+                    const ponto = (u) => (decodeURIComponent(u).match(/-?\d+\.\d{4,},-?\d+\.\d{4,}/) || [''])[0];
+                    return { quadro: ponto(document.querySelector('.contact-map-embed iframe').src), link: ponto(document.querySelector('.contact-map-link').href) };
+                })(),
                 h1: document.querySelectorAll('h1').length,
                 titulo: document.title,
             };
@@ -133,23 +160,154 @@ try {
         ok(g.cortados.length === 0, 'nada passa da borda direita da tela', `${g.cortados.length} elementos, ex.: ${g.cortados.slice(0, 8).join('; ')}`);
         ok(g.imagensQuebradas.length === 0, 'todas as imagens carregaram', g.imagensQuebradas.join(', '));
         ok(g.invisiveis === 0, 'nenhum bloco ficou invisível depois de rolar a página', `${g.invisiveis} blocos`);
+        ok(g.estrelasApagadas === 0, 'estrelas dos depoimentos todas acesas depois da animação', `${g.estrelasApagadas} com estrelas pela metade`);
         ok(g.secoesFaltando.length === 0, 'todas as seções existem', g.secoesFaltando.join(', '));
         ok(g.h1 === 1 && g.titulo.includes('Contabilidade em Fortaleza'), 'um único título principal e "Contabilidade em Fortaleza" no título da aba', `h1=${g.h1}, "${g.titulo}"`);
         ok(g.linksWhats.length >= 10 && g.whatsErrados.length === 0, `${g.linksWhats.length} links de WhatsApp, todos para o número certo`, g.whatsErrados.join(', '));
         ok(g.tortos.length === 0, 'ícones centralizados dentro das caixas', g.tortos.join('; '));
+        ok(g.mapa.quadro !== '' && g.mapa.quadro === g.mapa.link, 'mapa e link "Abrir no Google Maps" apontam para o mesmo ponto, por coordenadas', JSON.stringify(g.mapa));
+        if (g.botaoWhats.soIcone) ok(Math.abs(g.botaoWhats.dx) < 1.5 && Math.abs(g.botaoWhats.dy) < 1.5, 'botão flutuante do WhatsApp com o ícone no centro do círculo', `fora do centro ${Math.round(g.botaoWhats.dx)}px, ${Math.round(g.botaoWhats.dy)}px`);
+        ok(!g.diferenciais, 'seção "Diferenciais" fora do site, sem link sobrando no menu nem no rodapé');
         // As três pessoas estão no lado direito da foto: o quadro tem de ser quase quadrado e encostado na direita
         ok(g.foto.razaoTela > 0.9 && g.foto.razaoTela < 1.05 && g.foto.posicao.startsWith('100%') && g.foto.largura === g.foto.larguraCartao, 'foto dos sócios enquadrada no grupo (quadro quase quadrado), na largura toda do cartão', `proporção ${g.foto.razaoTela.toFixed(2)}, posição ${g.foto.posicao}, ${g.foto.largura}/${g.foto.larguraCartao}px`);
         ok(Math.abs(g.ultimoStat.right - g.gradeDireita) < 2, 'painel de números do topo sem quadro vazio', `sobra ${Math.round(g.gradeDireita - g.ultimoStat.right)}px`);
+        ok(g.logosFaixa === 6, 'faixa abaixo do topo com as 6 logos de clientes carregadas', `${g.logosFaixa} logos`);
+        ok(g.regimes === 6, 'os 6 regimes tributários aparecem na seção de serviços', `${g.regimes}`);
+        ok(g.etapas.total === 4 && g.etapas.acesas === 4 && (tela.width <= 960 || /^matrix\(1, 0, 0, 1, 0, 0\)$/.test(g.etapas.linha)), '"Como funciona": 4 etapas, todas acesas e com a linha desenhada até o fim', JSON.stringify(g.etapas));
+        ok(g.logoDepoimento, 'depoimento em destaque mostra a logo da empresa');
+        ok(g.telefone.visivel === (tela.width >= 1180) && g.telefone.href.startsWith('tel:+55'), `telefone fixo no cabeçalho ${tela.width >= 1180 ? 'visível' : 'oculto (tela estreita)'}, com link para ligar`, JSON.stringify(g.telefone));
         if (tela.width > 960) {
+            ok(Math.abs(g.topoTexto.top - g.topoPainel.top) < 2 && Math.abs(g.topoTexto.h - g.topoPainel.h) < 2 && Math.abs(g.topoTexto.w - g.topoPainel.w) < 2,
+                'topo: texto e painel com a mesma largura e a mesma altura, começando na mesma linha', `texto ${Math.round(g.topoTexto.w)}×${Math.round(g.topoTexto.h)}, painel ${Math.round(g.topoPainel.w)}×${Math.round(g.topoPainel.h)}, topos ${Math.round(g.topoTexto.top)} e ${Math.round(g.topoPainel.top)}`);
             ok(Math.abs(g.cartao.top - g.texto.top) < 2, 'foto dos sócios alinhada com o topo do texto ao lado', `diferença de ${Math.round(g.cartao.top - g.texto.top)}px`);
             if (tela.width > 1150) ok(Math.abs(g.cartao.bottom - g.texto.bottom) < 2, 'foto dos sócios alinhada com o fim do texto ao lado', `diferença de ${Math.round(g.cartao.bottom - g.texto.bottom)}px`);
+        }
+
+        // Convite do WhatsApp: aparece sozinho alguns segundos depois de a página abrir, cabe na tela e fecha no ×.
+        // Vem antes do teste de mouse do painel: em tela de tablet o convite aberto cobre um canto do painel.
+        const lerConvite = () => naPagina((whatsapp) => {
+            const c = document.querySelector('.convite');
+            const r = c.getBoundingClientRect();
+            return {
+                visivel: c.classList.contains('is-visible') && getComputedStyle(c).visibility === 'visible',
+                assuntos: [...c.querySelectorAll('.convite__opcoes a')].filter((a) => a.href.includes(`wa.me/${whatsapp}?text=`)).length,
+                cabe: r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight,
+            };
+        }, WHATSAPP);
+        let convite = await lerConvite();
+        for (let i = 0; i < 80 && !convite.visivel; i++) { await dormir(100); convite = await lerConvite(); }
+        await dormir(600); // termina a animação de entrada antes de medir
+        convite = await lerConvite();
+        ok(convite.visivel && convite.assuntos === 3 && convite.cabe, 'convite do WhatsApp aparece sozinho, com 3 assuntos, dentro da tela', JSON.stringify(convite));
+        await naPagina(() => document.querySelector('.convite__fechar').click());
+        await dormir(600);
+        ok(!(await lerConvite()).visivel, 'convite do WhatsApp fecha no ×');
+
+        // Painel animado do topo: contagem terminou no número certo, quadros são links, e ele inclina com o mouse
+        const lerPainel = () => naPagina((whatsapp) => {
+            const grade = document.querySelector('.hero__stats-grid');
+            const r = document.querySelector('.hero__visual').getBoundingClientRect();
+            return {
+                numeros: [...document.querySelectorAll('.hero__stat-value:not(.hero__stat-value--text)')].map((el) => el.textContent),
+                links: [...document.querySelectorAll('a.hero__stat')].map((a) => (a.href.includes(`wa.me/${whatsapp}`) ? 'whatsapp' : a.getAttribute('href'))),
+                inclinacao: getComputedStyle(grade).transform,
+                animacoes: [getComputedStyle(grade).animationName, getComputedStyle(document.querySelector('.hero__visual-bg')).animationName],
+                ponto: { x: Math.round(r.left + r.width * 0.2), y: Math.round(r.top + Math.min(r.height, innerHeight - r.top) * 0.2) },
+            };
+        }, WHATSAPP);
+        const painel = await lerPainel();
+        ok(painel.numeros.join(' ') === '200+ 15+', 'painel do topo: a contagem termina em 200+ e 15+', painel.numeros.join(' '));
+        ok(painel.links.join(' ') === 'whatsapp #depoimentos #empresa whatsapp', 'painel do topo: os 4 quadros são links (WhatsApp, depoimentos, empresa, WhatsApp)', painel.links.join(' '));
+        ok(painel.animacoes.join(' ') === 'flutuar balancar', 'painel do topo: flutua e o cartão de fundo balança', painel.animacoes.join(' '));
+        if (!tela.mobile) {
+            // Mouse de verdade sobre o canto do painel: ele tem de inclinar; ao sair, volta ao lugar
+            await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x: painel.ponto.x, y: painel.ponto.y });
+            await dormir(600);
+            const comMouse = await lerPainel();
+            await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 5, y: tela.height - 5 });
+            await dormir(700);
+            const semMouse = await lerPainel();
+            const plano = (m) => m === 'none' || /^matrix\(1, 0, 0, 1, 0, 0\)$/.test(m);
+            ok(!plano(comMouse.inclinacao) && plano(semMouse.inclinacao), 'painel do topo: inclina na direção do mouse e volta ao sair', `com mouse: ${comMouse.inclinacao.slice(0, 60)} | sem: ${semMouse.inclinacao.slice(0, 40)}`);
+        }
+
+        // Movimentos: barra de progresso do cabeçalho, faixa de logos, contagem do "15+" e links dos serviços
+        const vida = await naPagina(async (whatsapp) => {
+            const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
+            const barra = () => new DOMMatrix(getComputedStyle(document.querySelector('.header__progress')).transform).a;
+            const faixa = () => new DOMMatrix(getComputedStyle(document.querySelector('.partners__list')).transform).m41;
+            scrollTo({ top: 0, behavior: 'instant' }); await pausa(250);
+            const barraTopo = barra();
+            scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }); await pausa(250);
+            const barraFim = barra();
+            scrollTo({ top: 0, behavior: 'instant' });
+            const x1 = faixa(); await pausa(400); const x2 = faixa();
+            const servicos = [...document.querySelectorAll('.service-card:not(.service-card--cta)')].map((c) => {
+                const a = c.querySelector('a.service-card__link');
+                return !!a && a.href.includes(`wa.me/${whatsapp}?text=`) && decodeURIComponent(a.href).includes(c.querySelector('h3').textContent);
+            });
+            return { barraTopo, barraFim, faixaAndou: Math.abs(x2 - x1), listasFaixa: document.querySelectorAll('.partners__list').length, servicos, anos: document.querySelector('.about__number > span').textContent };
+        }, WHATSAPP);
+        ok(vida.barraTopo < 0.02 && vida.barraFim > 0.98, 'barra dourada do cabeçalho acompanha a rolagem (vazia no topo, cheia no fim)', `topo ${vida.barraTopo}, fim ${vida.barraFim}`);
+        ok(vida.listasFaixa === 2 && vida.faixaAndou > 3, 'faixa das logos de clientes desliza sozinha', `andou ${vida.faixaAndou}px em 0,4 s`);
+        ok(vida.anos === '15+', 'número da seção Empresa termina a contagem em 15+', vida.anos);
+        ok(vida.servicos.length === 7 && vida.servicos.every(Boolean), 'os 7 serviços têm link para o WhatsApp com o nome do serviço na mensagem', JSON.stringify(vida.servicos));
+
+        if (!tela.mobile) {
+            // Mouse de verdade sobre um quadro de serviço: o brilho dourado acende no ponto onde o cursor está
+            const ponto = await naPagina(async () => {
+                const r0 = document.querySelector('.service-card').getBoundingClientRect();
+                scrollTo({ top: r0.top + scrollY - (innerHeight - r0.height) / 2, behavior: 'instant' });
+                await new Promise((r) => setTimeout(r, 300));
+                const r = document.querySelector('.service-card').getBoundingClientRect();
+                return { x: Math.round(r.left + r.width * 0.3), y: Math.round(r.top + r.height * 0.4) };
+            });
+            await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x: ponto.x, y: ponto.y });
+            await dormir(700);
+            const brilho = await naPagina(() => {
+                const c = document.querySelector('.service-card');
+                return { mx: c.style.getPropertyValue('--mx'), my: c.style.getPropertyValue('--my'), opacidade: parseFloat(getComputedStyle(c, '::after').opacity) };
+            });
+            await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 5, y: tela.height - 5 });
+            ok(brilho.mx.endsWith('px') && brilho.my.endsWith('px') && brilho.opacidade > 0.9, 'quadros de serviço: o brilho dourado acompanha o mouse', JSON.stringify(brilho));
+        }
+
+        // Fotos do escritório: clicar amplia, a seta troca de foto e o × fecha
+        const fotos = await naPagina(async () => {
+            const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
+            const janela = document.querySelector('.lightbox');
+            const itens = [...document.querySelectorAll('button.gallery__item')];
+            itens[1].click(); await pausa(700);
+            const img = janela.querySelector('img');
+            const r = img?.getBoundingClientRect();
+            const abriu = janela.open && !!img && img.complete && img.naturalWidth > 0;
+            const cabe = !!r && r.left >= 0 && r.right <= innerWidth + 1 && r.top >= 0 && r.bottom <= innerHeight + 1;
+            const primeira = img?.getAttribute('src');
+            janela.querySelector('.lightbox__seta--proxima').click(); await pausa(500);
+            const segunda = janela.querySelector('img')?.getAttribute('src');
+            janela.querySelector('.lightbox__fechar').click(); await pausa(300);
+            return { fotos: itens.length, abriu, cabe, trocou: !!segunda && segunda !== primeira, fechou: !janela.open && !janela.querySelector('img') };
+        });
+        ok(fotos.fotos === 4 && fotos.abriu && fotos.cabe && fotos.trocou && fotos.fechou, 'fotos do escritório: clicar amplia dentro da tela, a seta troca de foto e o × fecha', JSON.stringify(fotos));
+
+        if (tela.width <= 720) {
+            // Depoimentos: ao deslizar até o terceiro, o terceiro pontinho fica marcado
+            const pontos = await naPagina(async () => {
+                const grade = document.querySelector('.testimonials__grid');
+                grade.scrollTo({ left: (grade.children[1].offsetLeft - grade.children[0].offsetLeft) * 2, behavior: 'instant' });
+                await new Promise((r) => setTimeout(r, 500));
+                const marcados = [...document.querySelectorAll('.testimonials__dots span')].map((s) => s.classList.contains('is-active'));
+                grade.scrollTo({ left: 0, behavior: 'instant' });
+                return marcados;
+            });
+            ok(pontos.length === 3 && pontos.indexOf(true) === 2 && pontos.filter(Boolean).length === 1, 'depoimentos: o pontinho marcado acompanha o depoimento que está na tela', JSON.stringify(pontos));
         }
 
         // Qual versão o navegador montou para esta largura de tela (a página é a mesma; o CSS escolhe pelo tamanho)
         const v = await naPagina(() => {
             const visivel = (sel) => { const el = document.querySelector(sel); return !!el && getComputedStyle(el).display !== 'none'; };
             const grade = document.querySelector('.testimonials__grid');
-            const pequenos = [...document.querySelectorAll('a.btn, .nav-toggle, .faq__item summary, .whatsapp-float, .footer__social')]
+            const pequenos = [...document.querySelectorAll('a.btn, .nav-toggle, .faq__item summary, .whatsapp-float, .footer__social, a.service-card__link, .convite__opcoes a, .convite__fechar')]
                 .map((el) => ({ el, r: el.getBoundingClientRect() }))
                 .filter(({ r }) => r.width > 0 && (r.width < 40 || r.height < 40))
                 .map(({ el, r }) => `${el.className.trim().split(/\s+/).slice(0, 2).join('.')} ${Math.round(r.width)}×${Math.round(r.height)}`);

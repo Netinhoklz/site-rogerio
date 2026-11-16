@@ -20,8 +20,8 @@ Precisa do Node 20 ou mais novo (o projeto usa o 24, indicado em `.node-version`
 O repositório já traz o arquivo [render.yaml](render.yaml), que o Render lê sozinho.
 
 1. Entre em [render.com](https://render.com) e conecte a conta do GitHub.
-2. Clique em **New → Blueprint** e escolha este repositório.
-3. Confirme. O Render instala as dependências (`npm ci`), gera o site (`npm run build`) e publica a pasta `dist/`.
+2. Clique em **New → Blueprint** e, na lista, clique em **Connect** ao lado deste repositório.
+3. Dê um nome ao Blueprint, deixe a branch `main` e clique em **Deploy Blueprint**. O Render instala as dependências (`npm ci`), gera o site (`npm run build`) e publica a pasta `dist/`.
 
 O site fica em `https://site-rogerio.onrender.com` (ou no nome que o Render indicar), com HTTPS automático. A cada `git push` na branch `main`, o Render publica a versão nova.
 
@@ -32,10 +32,41 @@ O site fica em `https://site-rogerio.onrender.com` (ou no nome que o Render indi
 | O quê | Onde |
 |---|---|
 | Telefone, WhatsApp, endereço, horário, Instagram | [src/data/content.js](src/data/content.js) (topo do arquivo) |
-| Serviços, diferenciais, depoimentos, perguntas frequentes, clientes | [src/data/content.js](src/data/content.js) |
+| Serviços, depoimentos, perguntas frequentes, clientes | [src/data/content.js](src/data/content.js) |
 | Textos de cada seção | arquivos em [src/components/](src/components/) |
 | Cores e aparência | [src/index.css](src/index.css) (as cores ficam no bloco `:root`, no início) |
 | Título e descrição que aparecem no Google | [index.html](index.html) |
+
+### Movimentos e interações
+
+| O quê | Onde |
+|---|---|
+| Convite do WhatsApp (balão que sai do botão verde): tempo para aparecer, tempo para sumir e os três assuntos | `APARECE_EM`, `SOME_EM` e `ASSUNTOS`, em [src/components/FloatingButtons.jsx](src/components/FloatingButtons.jsx) |
+| Mensagem do link "Solicitar este serviço" de cada quadro | [src/components/Services.jsx](src/components/Services.jsx) |
+| Números que contam (200+ e 15+) | [src/components/HeroPanel.jsx](src/components/HeroPanel.jsx) e [src/components/About.jsx](src/components/About.jsx) |
+| Faixa de logos de clientes, abaixo do topo | lista `CLIENTS`, em [src/data/content.js](src/data/content.js); a velocidade fica em `.partners__list` (`animation: esteira 34s`), em [src/index.css](src/index.css) |
+| Fotos que ampliam ao clicar | lista `OFFICE_PHOTOS`, em [src/data/content.js](src/data/content.js) |
+
+### Elementos de confiança
+
+| O quê | Onde |
+|---|---|
+| Telefone fixo no cabeçalho (aparece em telas largas) | `PHONE`, em [src/data/content.js](src/data/content.js) |
+| Etapas da seção "Como funciona" | `PROCESS_STEPS`, em [src/data/content.js](src/data/content.js) |
+| Logo ao lado do depoimento em destaque | campo `logo` do depoimento, em `TESTIMONIALS` ([src/data/content.js](src/data/content.js)) |
+| Regimes tributários, no cabeçalho da seção de serviços | `REGIMES`, em [src/data/content.js](src/data/content.js) |
+
+O convite do WhatsApp aparece uma vez por visita. Quem ativou "reduzir movimento" no aparelho vê o site parado, com todo o conteúdo à vista.
+
+### Seção guardada: "Diferenciais"
+
+A seção "Diferenciais" (seis cartões numerados) saiu do site em 16/11/2026, mas continua guardada no código. Para trazê-la de volta, tire o comentário destas quatro linhas e gere o site de novo:
+
+1. [src/App.jsx](src/App.jsx): a linha `import Features ...` e a linha `<Features />`.
+2. [src/data/content.js](src/data/content.js): o item `diferenciais` em `NAV_ITEMS` (menu).
+3. [src/components/Footer.jsx](src/components/Footer.jsx): o link "Diferenciais" do rodapé.
+
+Os textos estão em `FEATURES` ([src/data/content.js](src/data/content.js)), o componente em [src/components/Features.jsx](src/components/Features.jsx) e o visual nas regras `.feature` de [src/index.css](src/index.css). Depois de reativar, acrescente `'diferenciais'` à lista `SECOES` de [scripts/verificar_site.mjs](scripts/verificar_site.mjs) e troque o fundo de `.process` para `var(--off-white)` em [src/index.css](src/index.css), para as seções continuarem alternando de cor.
 
 ### Fotos e logos
 
@@ -57,7 +88,6 @@ Depois de acrescentar a logo de um cliente, inclua-a em `CLIENTS`, em [src/data/
 |---|---|---|
 | Menu | botão ☰ que abre a lista | horizontal, no cabeçalho |
 | Serviços | uma coluna, só título e descrição | três colunas, com a lista de itens |
-| Diferenciais | lista compacta | grade de cartões |
 | Depoimentos | fileira para deslizar com o dedo | grade |
 | WhatsApp | botão redondo fixo no canto | botão com texto no canto e no cabeçalho |
 

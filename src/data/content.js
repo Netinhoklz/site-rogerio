@@ -20,24 +20,31 @@ export const ADDRESS_CITY = 'Fortaleza';
 export const ADDRESS_STATE = 'CE';
 export const ADDRESS_CEP = '60732-330';
 export const ADDRESS = `${ADDRESS_STREET} - ${ADDRESS_DISTRICT}, ${ADDRESS_CITY} - ${ADDRESS_STATE}, ${ADDRESS_CEP}`;
-// Link "Abrir no Google Maps": busca pelo endereço, o mesmo ponto do mapa embutido
-// (a busca pelo nome só funciona se a empresa tiver perfil no Google com esse nome exato)
-export const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ADDRESS)}`;
-// Embed do Google Maps gerado a partir do endereço (não precisa de chave de API)
-export const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(ADDRESS)}&output=embed`;
+// Ponto do escritório no mapa: latitude e longitude do número 1591 da rua do CEP 60732-330.
+// O mapa usa as coordenadas, e não o texto do endereço, porque o Google Maps não reconhece o nome
+// "R. Coronel Nunes Freire": ele e os Correios chamam a rua desse CEP de "Rua Pereira Silva", e a busca
+// pelo texto mostrava só a região, sem marcador. Para mudar o ponto: no Google Maps, clique com o botão
+// direito no lugar certo, copie os dois números e cole aqui.
+export const MAPS_PONTO = '-3.8152872,-38.6281619';
+// Link "Abrir no Google Maps": abre o mesmo ponto do mapa embutido
+export const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${MAPS_PONTO}`;
+// Mapa embutido (não precisa de chave de API): marcador no ponto, com o nome da empresa na etiqueta
+export const MAPS_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(`${MAPS_PONTO} (GRB Assessoria Contábil)`)}&z=17&output=embed`;
 
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá. Encontrei a GRB Assessoria Contábil pelo site e gostaria de mais informações.')}`;
 export const WHATSAPP_QUOTE_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá. Gostaria de solicitar uma proposta para a minha empresa.')}`;
 export const WHATSAPP_DIAG_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá. Gostaria de solicitar um diagnóstico gratuito do cenário fiscal e tributário da minha empresa.')}`;
 export const WHATSAPP_OPEN_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá. Gostaria de abrir uma empresa com a GRB Assessoria Contábil.')}`;
 export const WHATSAPP_LOCATION_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Olá. Gostaria de informações sobre a localização e o horário de atendimento.')}`;
+// Link do WhatsApp com uma mensagem já escrita (usado no link "Solicitar este serviço" de cada quadro)
+export const whatsappLink = (mensagem) => `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensagem)}`;
 
 
 export const NAV_ITEMS = [
     { id: 'inicio', label: 'Início' },
     { id: 'empresa', label: 'Empresa' },
     { id: 'servicos', label: 'Serviços' },
-    { id: 'diferenciais', label: 'Diferenciais' },
+    // { id: 'diferenciais', label: 'Diferenciais' },   // seção guardada: ver README
     { id: 'faq', label: 'FAQ' },
     { id: 'contato', label: 'Contato' },
 ];
@@ -133,6 +140,15 @@ export const SERVICES = [
     },
 ];
 
+// Etapas da seção "Como funciona". Não trazem promessa nova: repetem o que o site já afirma
+// nas perguntas frequentes (proposta, transição) e na chamada do diagnóstico gratuito.
+export const PROCESS_STEPS = [
+    { title: 'Contato inicial', text: 'Você fala com a nossa equipe pelo WhatsApp e apresenta a sua empresa e a sua necessidade.' },
+    { title: 'Diagnóstico gratuito', text: 'Analisamos o cenário fiscal e tributário da sua empresa, sem custo e sem compromisso.' },
+    { title: 'Proposta detalhada', text: 'Apresentamos os serviços e os honorários com clareza, sem custos não previstos.' },
+    { title: 'Transição e acompanhamento', text: 'Conduzimos a transição da contabilidade atual, quando houver, e passamos a cuidar das obrigações da sua empresa.' },
+];
+
 // Missão, visão e valores: texto do folder da empresa (referencia/Infográfico Corporativo GRB)
 export const PRINCIPLES = {
     mission: 'Oferecer serviços contábeis com ética, transparência e excelência, ajudando nossos clientes a cumprir suas obrigações e tomar decisões seguras para o crescimento sustentável de seus negócios.',
@@ -156,6 +172,7 @@ export const OFFICE_PHOTOS = [
     { src: 'fotos/atendimento.webp', alt: 'Sala de atendimento da GRB', width: 1200, height: 799 },
 ];
 
+// Textos da seção "Diferenciais". A seção está guardada, fora do site (ver README); os textos ficam aqui para a volta.
 export const FEATURES = [
     { n: '01', title: 'Tecnologia', text: 'Automação de rotinas, integração com o sistema de gestão da empresa e painéis de acompanhamento em tempo real, acessíveis de qualquer lugar.' },
     { n: '02', title: 'Eficiência tributária', text: 'Monitoramento contínuo de oportunidades para reduzir a carga tributária da empresa, em conformidade com a legislação.' },
@@ -174,6 +191,16 @@ export const TESTIMONIALS = [
         role: 'CEO',
         company: 'C de Construção',
         companyDesc: 'Elétrica, hidráulica e pintura em geral',
+        // logo da empresa, mostrada ao lado do depoimento em destaque
+        logo: 'clientes/c-de-construcao.png',
+    },
+    {
+        // Depoimento da Infinity Quant, assinado pela empresa. Para assinar com nome e cargo de uma pessoa:
+        // name: 'Nome', role: 'Cargo', company: 'Infinity Quant', companyDesc: 'Ciência de dados'
+        quote: 'Na Infinity Quant, trabalhamos com ciência de dados e exigimos precisão. A GRB Assessoria Contábil entrega exatamente isso: organização, orientações claras e atendimento ágil. É uma parceria de total confiança, que recomendamos a outras empresas.',
+        name: 'Infinity Quant',
+        role: 'Ciência de dados',
+        logo: 'clientes/infinity-quant.webp',
     },
     {
         quote: 'Migrei minha empresa para a GRB há 3 anos e nunca mais tive surpresa com imposto. Eles explicam tudo de um jeito que eu entendo, sem juridiquês.',
@@ -189,27 +216,6 @@ export const TESTIMONIALS = [
         company: 'Studio Bella',
         companyDesc: 'Salão de beleza e estética em Fortaleza - CE',
     },
-    {
-        quote: 'Conseguiram recuperar créditos tributários que nem sabia que tinha. Só isso pagou a contabilidade do ano inteiro. Recomendo sem hesitar.',
-        name: 'Rogério Barbosa',
-        role: 'Diretor',
-        company: 'Construtora Horizonte',
-        companyDesc: 'Construtora e incorporadora com 10 anos de mercado',
-    },
-    {
-        quote: 'Abri minha empresa em menos de uma semana com a ajuda da GRB. O processo foi simples, rápido e sem dor de cabeça. Vale cada centavo.',
-        name: 'Fernanda Souza',
-        role: 'Fundadora',
-        company: 'FS Consultoria',
-        companyDesc: 'Consultoria de RH e gestão de pessoas',
-    },
-    {
-        quote: 'A GRB identificou uma economia de R$ 28 mil por ano só ajustando meu regime tributário. Não imaginava que estava pagando tanto a mais.',
-        name: 'Carlos Mendes',
-        role: 'Sócio-proprietário',
-        company: 'Auto Peças Mendes',
-        companyDesc: 'Comércio de peças e acessórios automotivos',
-    },
 ];
 
 // Logos de clientes (arquivos em public/clientes/, preparados com scripts/preparar_logos.py)
@@ -219,6 +225,8 @@ export const CLIENTS = [
     { name: 'Dominus', logo: 'clientes/dominus.png' },
     { name: 'Realize Mais Negócios Imobiliários', logo: 'clientes/realize-mais.png' },
     { name: 'S7 Gestão Industrial', logo: 'clientes/s7-gestao-industrial.png' },
+    // logo sobre fundo escuro: preparada com scripts/preparar_logos.py --fundo-original
+    { name: 'Infinity Quant', logo: 'clientes/infinity-quant.webp' },
 ];
 
 export const FAQS = [

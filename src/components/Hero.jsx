@@ -1,3 +1,4 @@
+import HeroPanel from './HeroPanel.jsx';
 import { WHATSAPP_DIAG_URL, WHATSAPP_URL } from '../data/content.js';
 
 export default function Hero() {
@@ -48,25 +49,7 @@ export default function Hero() {
                     </div>
                 </div>
 
-                <div className="hero__visual" aria-hidden="true">
-                    <div className="hero__visual-bg"></div>
-                    <div className="hero__stats-grid">
-                        <div className="hero__stat hero__stat--main">
-                            <span className="hero__stat-value hero__stat-value--text">Análise e otimização tributária para a sua empresa</span>
-                        </div>
-                        <div className="hero__stat">
-                            <span className="hero__stat-value">200+</span>
-                            <span className="hero__stat-label">empresas atendidas</span>
-                        </div>
-                        <div className="hero__stat">
-                            <span className="hero__stat-value">15+</span>
-                            <span className="hero__stat-label">anos de atuação</span>
-                        </div>
-                        <div className="hero__stat">
-                            <span className="hero__stat-value hero__stat-value--text">Atendimento imediato</span>
-                        </div>
-                    </div>
-                </div>
+                <HeroPanel />
             </div>
         </section>
     );

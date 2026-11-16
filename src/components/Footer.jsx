@@ -61,7 +61,7 @@ export default function Footer() {
                         <h4>Empresa</h4>
                         <ul>
                             <li><a href="#empresa">Sobre a GRB</a></li>
-                            <li><a href="#diferenciais">Diferenciais</a></li>
+                            {/* <li><a href="#diferenciais">Diferenciais</a></li>   seção guardada: ver README */}
                             <li><a href="#faq">Perguntas Frequentes</a></li>
                             <li><a href="#contato">Contato</a></li>
                         </ul>

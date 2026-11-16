@@ -6,10 +6,10 @@ export default function Principles() {
     return (
         <section className="section principles" id="principios">
             <div className="container">
-                <header className="section__header section__header--center">
+                <Reveal as="header" className="section__header section__header--center">
                     <span className="eyebrow">Nossos princípios</span>
                     <h2 className="section__title">Missão, visão e valores</h2>
-                </header>
+                </Reveal>
 
                 <div className="principles__grid">
                     <Reveal as="article" className="principle">

@@ -1,12 +1,13 @@
-import { SERVICES, WHATSAPP_URL } from '../data/content.js';
+import { SERVICES, REGIMES, WHATSAPP_URL, whatsappLink } from '../data/content.js';
 import { ICON_MAP, IconWhatsFilled } from './icons.jsx';
 import useReveal from '../hooks/useReveal.js';
+import Reveal from './Reveal.jsx';
 
 export default function Services() {
     return (
         <section className="section section--dark" id="servicos">
             <div className="container">
-                <header className="section__header">
+                <Reveal as="header" className="section__header">
                     <span className="eyebrow eyebrow--light">Nossos serviços</span>
                     <h2 className="section__title section__title--light">
                         Serviços de contabilidade em Fortaleza para a sua empresa
@@ -14,7 +15,13 @@ export default function Services() {
                     <p className="section__lead section__lead--light">
                         Oferecemos soluções contábeis completas para empresas, MEIs e profissionais autônomos, com responsabilidade, transparência e atendimento personalizado. Nosso compromisso é simplificar suas obrigações contábeis e fiscais, para que você tenha mais tempo para se dedicar ao crescimento do seu negócio.
                     </p>
-                </header>
+                    <div className="regimes">
+                        <p className="regimes__label">Atuamos com todos os regimes tributários</p>
+                        <ul role="list">
+                            {REGIMES.map(r => <li key={r}>{r}</li>)}
+                        </ul>
+                    </div>
+                </Reveal>
 
                 <div className="services">
                     {SERVICES.map(svc => <ServiceCard key={svc.title} service={svc} />)}
@@ -46,6 +53,14 @@ function ServiceCard({ service }) {
             <ul>
                 {service.items.map(item => <li key={item}>{item}</li>)}
             </ul>
+            <a
+                className="service-card__link"
+                href={whatsappLink(`Olá. Gostaria de informações sobre o serviço: ${service.title}.`)}
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Solicitar este serviço <span aria-hidden="true">→</span>
+            </a>
         </article>
     );
 }

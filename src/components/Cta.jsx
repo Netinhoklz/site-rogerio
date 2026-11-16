@@ -1,3 +1,4 @@
+import Reveal from './Reveal.jsx';
 import { WHATSAPP_DIAG_URL, WHATSAPP_QUOTE_URL, PHONE, PHONE_TEL } from '../data/content.js';
 
 export default function Cta() {
@@ -5,7 +6,7 @@ export default function Cta() {
         <section className="cta-section">
             <div className="cta-section__bg" aria-hidden="true"></div>
             <div className="container cta-section__inner">
-                <div className="cta-section__text">
+                <Reveal className="cta-section__text">
                     <span className="cta-section__tag">Diagnóstico gratuito</span>
                     <h2>Sua empresa pode estar recolhendo mais tributos do que o necessário</h2>
                     <p>
@@ -16,8 +17,8 @@ export default function Cta() {
                         <li><span>✓</span> Resultado em até 24 horas</li>
                         <li><span>✓</span> Atendimento realizado por especialista</li>
                     </ul>
-                </div>
-                <div className="cta-section__actions">
+                </Reveal>
+                <Reveal className="cta-section__actions">
                     <a
                         href={WHATSAPP_DIAG_URL}
                         className="btn btn--whatsapp btn--xl"
@@ -40,7 +41,7 @@ export default function Cta() {
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
                         Atendimento por telefone: {PHONE}
                     </a>
-                </div>
+                </Reveal>
             </div>
         </section>
     );
